@@ -1,0 +1,646 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>24点 - 趣味数学游戏</title>
+    <!-- 引入Tailwind CSS -->
+    <link href="https://cdn.staticfile.org/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
+    <!-- 引入Font Awesome -->
+    <link href="https://cdn.staticfile.org/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <!-- 引入Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;500;600;700&family=Noto+Sans+SC:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <!-- 引入自定义CSS -->
+    <link href="./style.css" rel="stylesheet">
+</head>
+<body class="bg-gradient-to-br from-blue-50 to-indigo-100 min-h-screen font-sans">
+    <div class="container mx-auto px-4 py-8">
+        <!-- 游戏标题 -->
+        <header class="text-center mb-8">
+            <h1 class="text-4xl md:text-5xl font-bold text-indigo-800 mb-2 game-title" style="font-family: 'Noto Sans SC', sans-serif;">24点计算</h1>
+            <p class="text-lg text-gray-600">用加减乘除，算出24！</p>
+        </header>
+
+        <!-- 游戏模式选择 -->
+        <div class="game-mode-selection bg-white rounded-xl shadow-lg p-6 mb-8 max-w-md mx-auto">
+            <h2 class="text-xl font-bold text-gray-800 mb-4">选择比赛模式</h2>
+            <div class="flex flex-col sm:flex-row gap-4">
+                <button id="calculation-mode" class="mode-btn bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-3 px-6 rounded-lg transition-all flex-1 flex items-center justify-center">
+                    <i class="fas fa-calculator mr-2"></i> 计算模式
+                </button>
+                <button id="challenge-mode" class="mode-btn bg-pink-600 hover:bg-pink-700 text-white font-medium py-3 px-6 rounded-lg transition-all flex-1 flex items-center justify-center">
+                    <i class="fas fa-trophy mr-2"></i> 挑战模式
+                </button>
+                <button id="square-mode" class="mode-btn bg-green-600 hover:bg-green-700 text-white font-medium py-3 px-6 rounded-lg transition-all flex-1 flex items-center justify-center">
+                    <span style="font-size:1.3em;line-height:1;margin-right:0.5em;">x²</span> 平方模式
+                </button>
+                <button id="practice-mode" class="mode-btn bg-yellow-600 hover:bg-yellow-700 text-white font-medium py-3 px-6 rounded-lg transition-all flex-1 flex items-center justify-center">
+                    <i class="fas fa-graduation-cap mr-2"></i> 练习模式
+                </button>
+            </div>
+        </div>
+
+        <!-- 游戏区域 -->
+        <div id="game-area" class="hidden">
+            <!-- 计算模式界面 -->
+            <div id="calculation-area" class="hidden game-container bg-white rounded-xl shadow-lg p-6 mb-8 max-w-3xl mx-auto">
+                <h2 class="text-xl font-bold text-gray-800 mb-4">计算模式</h2>
+                <p class="text-gray-600 mb-6">选择4张牌，我们将为您计算出24点解法</p>
+                
+                <!-- 牌选择区域 -->
+                <div class="card-selection mb-6">
+                    <h3 class="text-lg font-medium text-gray-700 mb-3">选择4张牌：</h3>
+                    <div class="grid grid-cols-4 sm:grid-cols-7 md:grid-cols-9 lg:grid-cols-13 gap-2">
+                        <!-- 牌会通过JavaScript动态生成 -->
+                    </div>
+                </div>
+                
+                <!-- 已选牌展示区域 -->
+                <div class="selected-cards mb-6">
+                    <div class="flex justify-between items-center mb-3">
+                        <h3 class="text-lg font-medium text-gray-700">已选牌：</h3>
+                        <button id="clear-selected-cards" class="text-gray-500 hover:text-indigo-600 transition-colors flex items-center">
+                            <i class="fas fa-trash-alt mr-1"></i> 清空
+                        </button>
+                    </div>
+                    <div class="flex flex-wrap gap-4 min-h-[120px] p-4 bg-indigo-50 rounded-lg">
+                        <!-- 已选牌会通过JavaScript动态展示 -->
+                    </div>
+                </div>
+                
+                <!-- 计算按钮 -->
+                <div class="text-center mb-6">
+                    <button id="calculate-btn" class="bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-3 px-8 rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed">
+                        <i class="fas fa-equals mr-2"></i> 计算24点
+                    </button>
+                </div>
+                
+                <!-- 结果展示区域 -->
+                <div id="calculation-result" class="hidden result-container p-4 rounded-lg">
+                    <!-- 结果会通过JavaScript动态展示 -->
+                </div>
+            </div>
+            
+            <!-- 挑战模式界面 -->
+            <div id="challenge-area" class="hidden game-container bg-white rounded-xl shadow-lg p-6 mb-8 max-w-3xl mx-auto">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-xl font-bold text-gray-800">挑战模式</h2>
+                    <div class="flex items-center">
+                        <div class="text-sm text-gray-600 mr-4">
+                            <i class="fas fa-stopwatch mr-1"></i> <span id="timer">00:00</span>
+                        </div>
+                        <div class="text-sm text-gray-600">
+                            <i class="fas fa-star mr-1"></i> 得分: <span id="score">0</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 随机牌展示区域 -->
+                <div class="random-cards mb-6">
+                    <div class="flex flex-wrap justify-center gap-4 min-h-[150px]">
+                        <!-- 随机牌会通过JavaScript动态展示 -->
+                    </div>
+                </div>
+                
+                <!-- 计算输入区域 -->
+                <div class="calculation-input mb-6">
+                    <div class="flex flex-col sm:flex-row gap-4">
+                        <div class="flex-1">
+                            <input type="text" id="calculation-input" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="输入您的计算公式..." readonly>
+                            <p class="text-xs text-gray-500 mt-1">使用下方虚拟键盘输入计算公式，表达式完整时将自动提交</p>
+                        </div>
+                        <button id="submit-calculation" class="hidden bg-pink-600 hover:bg-pink-700 text-white font-medium py-3 px-6 rounded-lg transition-all">
+                            <i class="fas fa-check mr-2"></i> 提交
+                        </button>
+                    </div>
+                    
+                    <!-- 虚拟计算器键盘 -->
+                    <div class="virtual-keyboard mt-4 bg-gray-50 p-3 rounded-lg">
+                        <div class="grid grid-cols-4 gap-2">
+                            <!-- 牌值按钮 -->
+                            <button class="card-btn bg-white hover:bg-indigo-50 text-gray-800 font-medium py-2 px-4 rounded border border-gray-300 transition-all" data-value="A">A</button>
+                            <button class="card-btn bg-white hover:bg-indigo-50 text-gray-800 font-medium py-2 px-4 rounded border border-gray-300 transition-all" data-value="B">B</button>
+                            <button class="card-btn bg-white hover:bg-indigo-50 text-gray-800 font-medium py-2 px-4 rounded border border-gray-300 transition-all" data-value="C">C</button>
+                            <button class="card-btn bg-white hover:bg-indigo-50 text-gray-800 font-medium py-2 px-4 rounded border border-gray-300 transition-all" data-value="D">D</button>
+                            
+                            <!-- 运算符按钮 -->
+                            <button class="op-btn bg-indigo-100 hover:bg-indigo-200 text-indigo-800 font-medium py-2 px-4 rounded border border-indigo-200 transition-all" data-op="+">+</button>
+                            <button class="op-btn bg-indigo-100 hover:bg-indigo-200 text-indigo-800 font-medium py-2 px-4 rounded border border-indigo-200 transition-all" data-op="-">-</button>
+                            <button class="op-btn bg-indigo-100 hover:bg-indigo-200 text-indigo-800 font-medium py-2 px-4 rounded border border-indigo-200 transition-all" data-op="*">×</button>
+                            <button class="op-btn bg-indigo-100 hover:bg-indigo-200 text-indigo-800 font-medium py-2 px-4 rounded border border-indigo-200 transition-all" data-op="/">÷</button>
+                            
+                            <!-- 括号按钮 -->
+                            <button class="bracket-btn bg-pink-100 hover:bg-pink-200 text-pink-800 font-medium py-2 px-4 rounded border border-pink-200 transition-all" data-bracket="(">(</button>
+                            <button class="bracket-btn bg-pink-100 hover:bg-pink-200 text-pink-800 font-medium py-2 px-4 rounded border border-pink-200 transition-all" data-bracket=")">)</button>
+                            <!-- 中括号按钮 -->
+                            <button class="bracket-btn bg-yellow-50 hover:bg-yellow-100 text-yellow-800 font-medium py-2 px-4 rounded border border-yellow-100 transition-all" data-bracket="[">[</button>
+                            <button class="bracket-btn bg-yellow-50 hover:bg-yellow-100 text-yellow-800 font-medium py-2 px-4 rounded border border-yellow-100 transition-all" data-bracket="]">]</button>
+                            
+                            <!-- 功能按钮 -->
+                            <button id="backspace-btn" class="func-btn bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium py-2 px-4 rounded border border-gray-300 transition-all col-span-1">
+                                <i class="fas fa-backspace"></i>
+                            </button>
+                            <button id="clear-btn" class="func-btn bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium py-2 px-4 rounded border border-gray-300 transition-all col-span-1">
+                                清空
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 操作按钮 -->
+                <div class="flex flex-col sm:flex-row gap-4">
+                    <button id="new-challenge" class="bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-3 px-6 rounded-lg transition-all flex-1 flex items-center justify-center">
+                        <i class="fas fa-sync-alt mr-2"></i> 新的挑战
+                    </button>
+                    <button id="show-solution" class="bg-gray-600 hover:bg-gray-700 text-white font-medium py-3 px-6 rounded-lg transition-all flex-1 flex items-center justify-center">
+                        <i class="fas fa-lightbulb mr-2"></i> 查看解法
+                    </button>
+                </div>
+                
+                <!-- 结果展示区域 -->
+                <div id="challenge-result" class="hidden result-container p-4 rounded-lg mt-6">
+                    <!-- 结果会通过JavaScript动态展示 -->
+                </div>
+            </div>
+            
+            <!-- 平方模式界面 -->
+            <div id="square-area" class="hidden game-container bg-white rounded-xl shadow-lg p-6 mb-8 max-w-3xl mx-auto">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-xl font-bold text-gray-800">平方模式</h2>
+                    <div class="flex items-center">
+                        <div class="text-sm text-gray-600 mr-4">
+                            <i class="fas fa-stopwatch mr-1"></i> <span id="square-timer">00:00</span>
+                        </div>
+                        <div class="text-sm text-gray-600">
+                            <i class="fas fa-star mr-1"></i> 得分: <span id="square-score">0</span>
+                        </div>
+                    </div>
+                </div>
+                <!-- 随机牌展示区域 -->
+                <div class="square-random-cards mb-6">
+                    <div class="flex flex-wrap justify-center gap-4 min-h-[150px]">
+                        <!-- 随机牌会通过JavaScript动态展示 -->
+                    </div>
+                </div>
+                <!-- 计算输入区域 -->
+                <div class="square-calculation-input mb-6">
+                    <div class="flex flex-col sm:flex-row gap-4">
+                        <div class="flex-1">
+                            <input type="text" id="square-calculation-input" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500" placeholder="输入您的计算公式..." readonly>
+                            <p class="text-xs text-gray-500 mt-1">可对任意数字使用一次平方（x²），表达式完整时将自动提交</p>
+                        </div>
+                        <button id="submit-square-calculation" class="hidden bg-green-600 hover:bg-green-700 text-white font-medium py-3 px-6 rounded-lg transition-all">
+                            <i class="fas fa-check mr-2"></i> 提交
+                        </button>
+                    </div>
+                    <!-- 虚拟计算器键盘（后续实现平方按钮） -->
+                    <div class="square-virtual-keyboard mt-4 bg-gray-50 p-3 rounded-lg">
+                        <div class="grid grid-cols-5 gap-2">
+                            <!-- 牌值按钮 A B C D -->
+                            <button class="square-card-btn bg-white hover:bg-green-50 text-gray-800 font-medium py-2 px-4 rounded border border-gray-300 transition-all" data-value="A">A</button>
+                            <button class="square-card-btn bg-white hover:bg-green-50 text-gray-800 font-medium py-2 px-4 rounded border border-gray-300 transition-all" data-value="B">B</button>
+                            <button class="square-card-btn bg-white hover:bg-green-50 text-gray-800 font-medium py-2 px-4 rounded border border-gray-300 transition-all" data-value="C">C</button>
+                            <button class="square-card-btn bg-white hover:bg-green-50 text-gray-800 font-medium py-2 px-4 rounded border border-gray-300 transition-all" data-value="D">D</button>
+                            <!-- 平方按钮 -->
+                            <button class="square-btn bg-green-100 hover:bg-green-200 text-green-800 font-medium py-2 px-4 rounded border border-green-200 transition-all col-span-1" data-square="true">x²</button>
+                            <!-- 运算符按钮 -->
+                            <button class="square-op-btn bg-green-100 hover:bg-green-200 text-green-800 font-medium py-2 px-4 rounded border border-green-200 transition-all" data-op="+">+</button>
+                            <button class="square-op-btn bg-green-100 hover:bg-green-200 text-green-800 font-medium py-2 px-4 rounded border border-green-200 transition-all" data-op="-">-</button>
+                            <button class="square-op-btn bg-green-100 hover:bg-green-200 text-green-800 font-medium py-2 px-4 rounded border border-green-200 transition-all" data-op="*">×</button>
+                            <button class="square-op-btn bg-green-100 hover:bg-green-200 text-green-800 font-medium py-2 px-4 rounded border border-green-200 transition-all" data-op="/">÷</button>
+                            <!-- 括号按钮 -->
+                            <button class="square-bracket-btn bg-green-50 hover:bg-green-100 text-green-800 font-medium py-2 px-4 rounded border border-green-100 transition-all" data-bracket="(">(</button>
+                            <button class="square-bracket-btn bg-green-50 hover:bg-green-100 text-green-800 font-medium py-2 px-4 rounded border border-green-100 transition-all" data-bracket=")">)</button>
+                            <!-- 中括号按钮 -->
+                            <button class="square-bracket-btn bg-yellow-50 hover:bg-yellow-100 text-yellow-800 font-medium py-2 px-4 rounded border border-yellow-100 transition-all" data-bracket="[">[</button>
+                            <button class="square-bracket-btn bg-yellow-50 hover:bg-yellow-100 text-yellow-800 font-medium py-2 px-4 rounded border border-yellow-100 transition-all" data-bracket="]">]</button>
+                            <!-- 功能按钮 -->
+                            <button id="square-backspace-btn" class="square-func-btn bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium py-2 px-4 rounded border border-gray-300 transition-all col-span-1">
+                                <i class="fas fa-backspace"></i>
+                            </button>
+                            <button id="square-clear-btn" class="square-func-btn bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium py-2 px-4 rounded border border-gray-300 transition-all col-span-1">
+                                清空
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <!-- 操作按钮 -->
+                <div class="flex flex-col sm:flex-row gap-4">
+                    <button id="new-square-challenge" class="bg-green-600 hover:bg-green-700 text-white font-medium py-3 px-6 rounded-lg transition-all flex-1 flex items-center justify-center">
+                        <i class="fas fa-sync-alt mr-2"></i> 新的挑战
+                    </button>
+                    <button id="show-square-solution" class="bg-gray-600 hover:bg-gray-700 text-white font-medium py-3 px-6 rounded-lg transition-all flex-1 flex items-center justify-center">
+                        <i class="fas fa-lightbulb mr-2"></i> 查看解法
+                    </button>
+                </div>
+                <!-- 结果展示区域 -->
+                <div id="square-challenge-result" class="hidden result-container p-4 rounded-lg mt-6">
+                    <!-- 结果会通过JavaScript动态展示 -->
+                </div>
+            </div>
+            
+            <!-- 练习模式界面 -->
+            <div id="practice-area" class="hidden game-container bg-white rounded-xl shadow-lg p-6 mb-8 max-w-3xl mx-auto">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-xl font-bold text-gray-800">练习模式</h2>
+                    <div class="flex items-center">
+                        <div class="text-sm text-gray-600 mr-4">
+                            <i class="fas fa-stopwatch mr-1"></i> <span id="practice-timer">00:00</span>
+                        </div>
+                        <div class="text-sm text-gray-600">
+                            <i class="fas fa-star mr-1"></i> 得分: <span id="practice-score">0</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="flex flex-col md:flex-row gap-6">
+                    <!-- 左侧解法选择列表 -->
+                    <div class="w-full md:w-1/4 bg-yellow-50 rounded-lg p-4">
+                        <h3 class="text-lg font-medium text-yellow-800 mb-3">
+                            <i class="fas fa-list-ul mr-2"></i> 解法列表
+                        </h3>
+                        <p class="text-sm text-gray-600 mb-3">选择一种解法进行针对性练习：</p>
+                        <div class="solution-methods space-y-2">
+                            <div class="solution-method-item">
+                                <label class="flex items-center space-x-2 cursor-pointer">
+                                    <input type="radio" name="solution-method" value="all" checked class="text-yellow-600 focus:ring-yellow-500 h-4 w-4">
+                                    <span class="text-gray-700">全部解法</span>
+                                </label>
+                            </div>
+                            <div class="solution-method-item">
+                                <label class="flex items-center space-x-2 cursor-pointer">
+                                    <input type="radio" name="solution-method" value="difference" class="text-yellow-600 focus:ring-yellow-500 h-4 w-4">
+                                    <span class="text-gray-700">差值运算法</span>
+                                </label>
+                                <p class="text-xs text-gray-500 mt-1 ml-6">适用于四个数之和大于24的情况</p>
+                            </div>
+                            <!-- 新增消除法一 -->
+                            <div class="solution-method-item">
+                                <label class="flex items-center space-x-2 cursor-pointer">
+                                    <input type="radio" name="solution-method" value="elimination-zero" class="text-yellow-600 focus:ring-yellow-500 h-4 w-4">
+                                    <span class="text-gray-700">消除法一（0特性）</span>
+                                </label>
+                                <p class="text-xs text-gray-500 mt-1 ml-6">适用于两个数能凑出24且另外两个数相同的情况</p>
+                            </div>
+                            <!-- 新增消除法二 -->
+                            <div class="solution-method-item">
+                                <label class="flex items-center space-x-2 cursor-pointer">
+                                    <input type="radio" name="solution-method" value="elimination-one" class="text-yellow-600 focus:ring-yellow-500 h-4 w-4">
+                                    <span class="text-gray-700">消除法二（1特性）</span>
+                                </label>
+                                <p class="text-xs text-gray-500 mt-1 ml-6">适用于两个数能凑出24且另外两个数能凑出1的情况</p>
+                            </div>
+                            <!-- 添加固定法 -->
+                            <div class="solution-method-item">
+                                <label class="flex items-center space-x-2 cursor-pointer">
+                                    <input type="radio" name="solution-method" value="fixed-factor" class="text-yellow-600 focus:ring-yellow-500 h-4 w-4">
+                                    <span class="text-gray-700">固定法</span>
+                                </label>
+                                <p class="text-xs text-gray-500 mt-1 ml-6">适用于四个数中有24的因数的情况</p>
+                            </div>
+                            <!-- 添加小组凑加法 -->
+                            <div class="solution-method-item">
+                                <label class="flex items-center space-x-2 cursor-pointer">
+                                    <input type="radio" name="solution-method" value="group-addition" class="text-yellow-600 focus:ring-yellow-500 h-4 w-4">
+                                    <span class="text-gray-700">小组凑加法</span>
+                                </label>
+                                <p class="text-xs text-gray-500 mt-1 ml-6">将四个数分成两组，使两组数的运算结果相加等于24</p>
+                            </div>
+                            <!-- 添加小组凑减法 -->
+                            <div class="solution-method-item">
+                                <label class="flex items-center space-x-2 cursor-pointer">
+                                    <input type="radio" name="solution-method" value="group-subtraction" class="text-yellow-600 focus:ring-yellow-500 h-4 w-4">
+                                    <span class="text-gray-700">小组凑减法</span>
+                                </label>
+                                <p class="text-xs text-gray-500 mt-1 ml-6">将四个数分成两组，使两组数的运算结果相减等于24</p>
+                            </div>
+                            <!-- 添加小组凑乘法 -->
+                            <div class="solution-method-item">
+                                <label class="flex items-center space-x-2 cursor-pointer">
+                                    <input type="radio" name="solution-method" value="group-multiplication" class="text-yellow-600 focus:ring-yellow-500 h-4 w-4">
+                                    <span class="text-gray-700">小组凑乘法</span>
+                                </label>
+                                <p class="text-xs text-gray-500 mt-1 ml-6">将四个数分成两组，使两组数的运算结果相乘等于24（如2×12=24, 3×8=24）</p>
+                            </div>
+                            <!-- 添加小组凑除法 -->
+                            <div class="solution-method-item">
+                                <label class="flex items-center space-x-2 cursor-pointer">
+                                    <input type="radio" name="solution-method" value="group-division" class="text-yellow-600 focus:ring-yellow-500 h-4 w-4">
+                                    <span class="text-gray-700">小组凑除法</span>
+                                </label>
+                                <p class="text-xs text-gray-500 mt-1 ml-6">将四个数分成两组，使两组数的运算结果相除等于24（如48÷2=24, 72÷3=24）</p>
+                            </div>
+                            <!-- 添加两倍关系替换法 -->
+                            <div class="solution-method-item">
+                                <label class="flex items-center space-x-2 cursor-pointer">
+                                    <input type="radio" name="solution-method" value="double-replacement" class="text-yellow-600 focus:ring-yellow-500 h-4 w-4">
+                                    <span class="text-gray-700">替换法（两倍关系）</span>
+                                </label>
+                                <p class="text-xs text-gray-500 mt-1 ml-6">利用数的两倍关系将一个数用减法算式替换</p>
+                            </div>
+                            <!-- 添加除法替换法 -->
+                            <div class="solution-method-item">
+                                <label class="flex items-center space-x-2 cursor-pointer">
+                                    <input type="radio" name="solution-method" value="division-replacement" class="text-yellow-600 focus:ring-yellow-500 h-4 w-4">
+                                    <span class="text-gray-700">替换法（除法算式）</span>
+                                </label>
+                                <p class="text-xs text-gray-500 mt-1 ml-6">将算式中的2或3替换为4÷2或9÷3</p>
+                            </div>
+                            <!-- 添加三一加减法 -->
+                            <div class="solution-method-item">
+                                <label class="flex items-center space-x-2 cursor-pointer">
+                                    <input type="radio" name="solution-method" value="three-one-addition-subtraction" class="text-yellow-600 focus:ring-yellow-500 h-4 w-4">
+                                    <span class="text-gray-700">三一加减法</span>
+                                </label>
+                                <p class="text-xs text-gray-500 mt-1 ml-6">先固定一个数，再用剩下三个数的运算结果与这个数通过加、减运算凑出24</p>
+                            </div>
+                            <!-- 添加三一凑除法 -->
+                            <div class="solution-method-item">
+                                <label class="flex items-center space-x-2 cursor-pointer">
+                                    <input type="radio" name="solution-method" value="three-one-division" class="text-yellow-600 focus:ring-yellow-500 h-4 w-4">
+                                    <span class="text-gray-700">三一凑除法</span>
+                                </label>
+                                <p class="text-xs text-gray-500 mt-1 ml-6">选一个数作为除数，将剩下三个数凑成这个数与24的积，再用积除以除数得24</p>
+                            </div>
+                            <!-- 后续可添加更多解法 -->
+                            <div class="solution-method-item opacity-50">
+                                <label class="flex items-center space-x-2 cursor-not-allowed">
+                                    <input type="radio" name="solution-method" value="coming-soon" disabled class="text-gray-400 h-4 w-4">
+                                    <span class="text-gray-400">更多解法 (即将推出)</span>
+                                </label>
+                            </div>
+                        </div>
+                        <!-- 添加滚动提示 -->
+                        <div class="text-xs text-gray-500 text-center mt-2">
+                            <i class="fas fa-chevron-down"></i> 滑动查看更多解法
+                        </div>
+                    </div>
+                    
+                    <!-- 右侧练习区域 -->
+                    <div class="w-full md:w-3/4">
+                        <!-- 随机牌展示区域 -->
+                        <div class="practice-random-cards mb-6">
+                            <div class="flex flex-wrap justify-center gap-4 min-h-[150px]">
+                                <!-- 随机牌会通过JavaScript动态展示 -->
+                            </div>
+                        </div>
+                        
+                        <!-- 算法提示区域 -->
+                        <!-- 差值算法提示 -->
+                        <div id="difference-hint" class="practice-hint bg-yellow-50 p-4 rounded-lg mb-6">
+                            <h3 class="text-lg font-medium text-yellow-800 mb-2">
+                                <i class="fas fa-lightbulb mr-2"></i> 差值运算法提示
+                            </h3>
+                            <p class="text-sm text-gray-700">
+                                如果四个数的和大于24，可以先用四个数的和减去24，得到一个差值，再看四个数中有没有刚好是差值一半的数，用其他三个数的和减去这个数，即可凑出24。这种方法叫作"差值运算法"。
+                            </p>
+                        </div>
+                        
+                        <!-- 消除法一提示 -->
+                        <div id="elimination-zero-hint" class="practice-hint bg-yellow-50 p-4 rounded-lg mb-6 hidden">
+                            <h3 class="text-lg font-medium text-yellow-800 mb-2">
+                                <i class="fas fa-lightbulb mr-2"></i> 消除法一（0特性）提示
+                            </h3>
+                            <p class="text-sm text-gray-700">
+                                在计算24点时，如果四个数中有两个相同的数，可以利用这两个数相减得到0的特性，然后用其他两个数凑出24，最后加上0得到24。
+                            </p>
+                        </div>
+                        
+                        <!-- 消除法二提示 -->
+                        <div id="elimination-one-hint" class="practice-hint bg-yellow-50 p-4 rounded-lg mb-6 hidden">
+                            <h3 class="text-lg font-medium text-yellow-800 mb-2">
+                                <i class="fas fa-lightbulb mr-2"></i> 消除法二（1特性）提示
+                            </h3>
+                            <p class="text-sm text-gray-700">
+                                在计算24点时，如果能找到两个数凑出24，另外两个数凑出1，则可以利用乘以1结果不变的特性，构造 24 × 1 = 24 的算式。
+                            </p>
+                        </div>
+                        
+                        <!-- 固定法提示 -->
+                        <div id="fixed-factor-hint" class="practice-hint bg-yellow-50 p-4 rounded-lg mb-6 hidden">
+                            <h3 class="text-lg font-medium text-yellow-800 mb-2">
+                                <i class="fas fa-lightbulb mr-2"></i> 固定法提示
+                            </h3>
+                            <p class="text-sm text-gray-700">
+                                在计算24点时，如果找到24的因数（如1,2,3,4,6,8,12），可以先固定这个因数，然后用剩余三个数凑出另一个因数，最后通过乘法得到24。
+                            </p>
+                        </div>
+                        
+                        <!-- 小组凑加法提示 -->
+                        <div id="group-addition-hint" class="practice-hint bg-yellow-50 p-4 rounded-lg mb-6 hidden">
+                            <h3 class="text-lg font-medium text-yellow-800 mb-2">
+                                <i class="fas fa-lightbulb mr-2"></i> 小组凑加法提示
+                            </h3>
+                            <p class="text-sm text-gray-700">
+                                在计算24点时，可以将四个数分成两组，使两组数的运算结果相加等于24。
+                            </p>
+                        </div>
+                        
+                        <!-- 小组凑减法提示 -->
+                        <div id="group-subtraction-hint" class="practice-hint bg-yellow-50 p-4 rounded-lg mb-6 hidden">
+                            <h3 class="text-lg font-medium text-yellow-800 mb-2">
+                                <i class="fas fa-lightbulb mr-2"></i> 小组凑减法提示
+                            </h3>
+                            <p class="text-sm text-gray-700">
+                                在计算24点时，可以将四个数分成两组，使两组数的运算结果相减等于24。
+                            </p>
+                        </div>
+                        
+                        <!-- 小组凑乘法提示 -->
+                        <div id="group-multiplication-hint" class="practice-hint bg-yellow-50 p-4 rounded-lg mb-6 hidden">
+                            <h3 class="text-lg font-medium text-yellow-800 mb-2">
+                                <i class="fas fa-lightbulb mr-2"></i> 小组凑乘法提示
+                            </h3>
+                            <p class="text-sm text-gray-700">
+                                在计算24点时，可以将四个数分成两组，使两组数的运算结果相乘等于24。
+                            </p>
+                        </div>
+                        
+                        <!-- 小组凑除法提示 -->
+                        <div id="group-division-hint" class="practice-hint bg-yellow-50 p-4 rounded-lg mb-6 hidden">
+                            <h3 class="text-lg font-medium text-yellow-800 mb-2">
+                                <i class="fas fa-lightbulb mr-2"></i> 小组凑除法提示
+                            </h3>
+                            <p class="text-sm text-gray-700">
+                                在计算24点时，可以将四个数分成两组，使两组数的运算结果相除等于24。
+                            </p>
+                        </div>
+                        
+                        <!-- 三一加减法提示 -->
+                        <div id="three-one-addition-subtraction-hint" class="practice-hint bg-yellow-50 p-4 rounded-lg mb-6 hidden">
+                            <h3 class="text-lg font-medium text-yellow-800 mb-2">
+                                <i class="fas fa-lightbulb mr-2"></i> 三一加减法提示
+                            </h3>
+                            <p class="text-sm text-gray-700">
+                                在计算24点时，可以先固定一个数，再用剩下的三个数的运算结果与这个数通过加、减运算凑出24。例如：
+                            </p>
+                            <ul class="text-sm text-gray-700 mt-2 list-disc pl-5">
+                                <li>如果固定数为3，则三个数运算结果需为27（27-3=24）</li>
+                                <li>如果固定数为1，则三个数运算结果需为25（25-1=24）或23（23+1=24）</li>
+                                <li>如果固定数为4，则三个数运算结果需为20（20+4=24）或28（28-4=24）</li>
+                            </ul>
+                            <p class="text-sm text-gray-700 mt-2">
+                                可以尝试不同的固定数，看哪个能让剩余三个数更容易凑出需要的结果。
+                            </p>
+                        </div>
+                        
+                        <!-- 三一凑除法提示 -->
+                        <div id="three-one-division-hint" class="practice-hint bg-yellow-50 p-4 rounded-lg mb-6 hidden">
+                            <h3 class="text-lg font-medium text-yellow-800 mb-2">
+                                <i class="fas fa-lightbulb mr-2"></i> 三一凑除法提示
+                            </h3>
+                            <p class="text-sm text-gray-700">
+                                在计算24点时，可以先选出一个数作为除数，再将剩下的三个数凑成这个数与24的积，最后用凑出的积除以除数得到24。具体做法：
+                            </p>
+                            <ul class="text-sm text-gray-700 mt-2 list-disc pl-5">
+                                <li>选择一个数作为除数（如2），计算这个数和24的积（2×24=48）</li>
+                                <li>用剩下的三个数凑出这个积（如4×3×4=48）</li>
+                                <li>最终算式：(4×3×4)÷2=24</li>
+                            </ul>
+                            <p class="text-sm text-gray-700 mt-2">
+                                除数可以选择1、2、3、4、6、8、12等24的因数，也可以是某些特定组合。
+                            </p>
+                        </div>
+
+                        <!-- 替换法（两倍关系）提示 -->
+                        <div id="double-replacement-hint" class="practice-hint bg-yellow-50 p-4 rounded-lg mb-6 hidden">
+                            <h3 class="text-lg font-medium text-yellow-800 mb-2">
+                                <i class="fas fa-lightbulb mr-2"></i> 替换法（两倍关系）提示
+                            </h3>
+                            <p class="text-sm text-gray-700">
+                                在计算24点时，如果发现某个数是另一个数的两倍，可以利用这种关系进行替换，简化计算。例如：
+                            </p>
+                            <ul class="text-sm text-gray-700 mt-2 list-disc pl-5">
+                                <li>如果有数字6和3，可以用"6÷3=2"替换其中一个数</li>
+                                <li>如果有数字8和4，可以用"8÷4=2"替换其中一个数</li>
+                                <li>如果有数字10和5，可以用"10÷5=2"替换其中一个数</li>
+                            </ul>
+                            <p class="text-sm text-gray-700 mt-2">
+                                替换后，用新的数字组合继续尝试计算24点。
+                            </p>
+                        </div>
+
+                        <!-- 替换法（除法替换）提示 -->
+                        <div id="division-replacement-hint" class="practice-hint bg-yellow-50 p-4 rounded-lg mb-6 hidden">
+                            <h3 class="text-lg font-medium text-yellow-800 mb-2">
+                                <i class="fas fa-lightbulb mr-2"></i> 替换法（除法替换）提示
+                            </h3>
+                            <p class="text-sm text-gray-700">
+                                在计算24点时，可以利用除法的结果替换某些数字，简化计算。常见的替换包括：
+                            </p>
+                            <ul class="text-sm text-gray-700 mt-2 list-disc pl-5">
+                                <li>4÷2=2：将4和2替换为2</li>
+                                <li>9÷3=3：将9和3替换为3</li>
+                                <li>8÷2=4：将8和2替换为4</li>
+                                <li>12÷2=6：将12和2替换为6</li>
+                            </ul>
+                            <p class="text-sm text-gray-700 mt-2">
+                                替换后，用新的数字组合继续尝试计算24点。
+                            </p>
+                        </div>
+                        
+                        <!-- 计算输入区域 -->
+                        <div class="practice-calculation-input mb-6">
+                            <div class="flex flex-col sm:flex-row gap-4">
+                                <div class="flex-1">
+                                    <input type="text" id="practice-calculation-input" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-500" placeholder="输入您的计算公式..." readonly>
+                                    <p class="text-xs text-gray-500 mt-1">使用下方虚拟键盘输入计算公式，表达式完整时将自动提交</p>
+                                </div>
+                                <button id="submit-practice-calculation" class="hidden bg-yellow-600 hover:bg-yellow-700 text-white font-medium py-3 px-6 rounded-lg transition-all">
+                                    <i class="fas fa-check mr-2"></i> 提交
+                                </button>
+                            </div>
+                            
+                            <!-- 虚拟计算器键盘 -->
+                            <div class="practice-virtual-keyboard mt-4 bg-gray-50 p-3 rounded-lg">
+                                <div class="grid grid-cols-4 gap-2">
+                                    <!-- 牌值按钮 -->
+                                    <button class="practice-card-btn bg-white hover:bg-yellow-50 text-gray-800 font-medium py-2 px-4 rounded border border-gray-300 transition-all" data-value="A">A</button>
+                                    <button class="practice-card-btn bg-white hover:bg-yellow-50 text-gray-800 font-medium py-2 px-4 rounded border border-gray-300 transition-all" data-value="B">B</button>
+                                    <button class="practice-card-btn bg-white hover:bg-yellow-50 text-gray-800 font-medium py-2 px-4 rounded border border-gray-300 transition-all" data-value="C">C</button>
+                                    <button class="practice-card-btn bg-white hover:bg-yellow-50 text-gray-800 font-medium py-2 px-4 rounded border border-gray-300 transition-all" data-value="D">D</button>
+                                    
+                                    <!-- 运算符按钮 -->
+                                    <button class="practice-op-btn bg-yellow-100 hover:bg-yellow-200 text-yellow-800 font-medium py-2 px-4 rounded border border-yellow-200 transition-all" data-op="+">+</button>
+                                    <button class="practice-op-btn bg-yellow-100 hover:bg-yellow-200 text-yellow-800 font-medium py-2 px-4 rounded border border-yellow-200 transition-all" data-op="-">-</button>
+                                    <button class="practice-op-btn bg-yellow-100 hover:bg-yellow-200 text-yellow-800 font-medium py-2 px-4 rounded border border-yellow-200 transition-all" data-op="*">×</button>
+                                    <button class="practice-op-btn bg-yellow-100 hover:bg-yellow-200 text-yellow-800 font-medium py-2 px-4 rounded border border-yellow-200 transition-all" data-op="/">÷</button>
+                                    
+                                    <!-- 括号按钮 -->
+                                    <button class="practice-bracket-btn bg-yellow-50 hover:bg-yellow-100 text-yellow-800 font-medium py-2 px-4 rounded border border-yellow-100 transition-all" data-bracket="(">(</button>
+                                    <button class="practice-bracket-btn bg-yellow-50 hover:bg-yellow-100 text-yellow-800 font-medium py-2 px-4 rounded border border-yellow-100 transition-all" data-bracket=")">)</button>
+                                    
+                                    <!-- 功能按钮 -->
+                                    <button id="practice-backspace-btn" class="practice-func-btn bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium py-2 px-4 rounded border border-gray-300 transition-all col-span-1">
+                                        <i class="fas fa-backspace"></i>
+                                    </button>
+                                    <button id="practice-clear-btn" class="practice-func-btn bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium py-2 px-4 rounded border border-gray-300 transition-all col-span-1">
+                                        清空
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- 操作按钮 -->
+                        <div class="flex flex-col sm:flex-row gap-4">
+                            <button id="new-practice-challenge" class="bg-yellow-600 hover:bg-yellow-700 text-white font-medium py-3 px-6 rounded-lg transition-all flex-1 flex items-center justify-center">
+                                <i class="fas fa-sync-alt mr-2"></i> 新的练习
+                            </button>
+                            <button id="show-practice-solution" class="bg-gray-600 hover:bg-gray-700 text-white font-medium py-3 px-6 rounded-lg transition-all flex-1 flex items-center justify-center">
+                                <i class="fas fa-lightbulb mr-2"></i> 查看解法
+                            </button>
+                            <button id="show-practice-hint" class="bg-yellow-500 hover:bg-yellow-600 text-white font-medium py-3 px-6 rounded-lg transition-all flex-1 flex items-center justify-center">
+                                <i class="fas fa-question-circle mr-2"></i> 显示提示
+                            </button>
+                        </div>
+                        
+                        <!-- 结果展示区域 -->
+                        <div id="practice-result" class="hidden result-container p-4 rounded-lg mt-6">
+                            <!-- 结果会通过JavaScript动态展示 -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 返回按钮 -->
+        <div id="back-button" class="hidden text-center mt-6 mb-6">
+            <button class="bg-gray-500 hover:bg-gray-600 text-white font-medium py-2 px-4 rounded-lg transition-all">
+                <i class="fas fa-arrow-left mr-2"></i> 返回选择
+            </button>
+        </div>
+        
+        <!-- 游戏说明 -->
+        <div class="game-instructions bg-white rounded-xl shadow-lg p-6 max-w-3xl mx-auto">
+            <h2 class="text-xl font-bold text-gray-800 mb-4">比赛说明</h2>
+            <div class="text-gray-600">
+                <p class="mb-3"><strong>24点</strong>是一种数学益智游戏，目标是使用四则运算（加、减、乘、除）将4个数字计算得到24。</p>
+                <p class="mb-3"><strong>计算模式：</strong>您可以选择任意4张牌，系统会计算出所有可能的24点解法。</p>
+                <p class="mb-3"><strong>挑战模式：</strong>系统随机生成4张牌，您需要在规定时间内找出24点解法。</p>
+                <p class="mb-3"><strong>平方模式：</strong>系统随机生成4张牌，您可以在加减乘除的基础上，对任意一张牌使用一次平方（x²），目标依然是算出24。</p>
+                <p class="mb-3"><strong>练习模式：</strong>系统随机生成4张牌，并提供差值运算法提示，帮助您更好地学习24点解题技巧。</p>
+                <p class="mb-3"><strong>规则说明：</strong></p>
+                <ul class="list-disc pl-5 mb-3">
+                    <li>必须使用所有4张牌，每张牌只能使用一次</li>
+                    <li>只能使用加(+)、减(-)、乘(*)、除(/)四则运算</li>
+                    <li>可以使用括号改变运算优先级</li>
+                    <!-- <li>A代表1，J、Q、K分别代表11、12、13</li> -->
+                    <li>平方模式下，每个数字最多只能使用一次平方（x²）</li>
+                </ul>
+
+            </div>
+        </div>
+        
+        <!-- 页脚 -->
+        <footer class="text-center text-gray-500 text-sm mt-8">
+            <p>© 2025 <a href="https://bbs.yikedouedu.com/" target="_blank" class="cursor-pointer hover:text-indigo-600 transition-colors">亿科豆</a>. 24点挑战 | 一个有趣的数学游戏</p>
+            <p class="mt-1">电话：13358378906 | 闽ICP备18018382号 | 闽公网安备 35020502000704号</p>
+        </footer>
+    </div>
+
+    <!-- 引入JavaScript -->
+    <script src="./script.js"></script>
+    <script src="./congratulation.js"></script>
+    <script src="./sounds.js"></script>
+</body>
+</html>
